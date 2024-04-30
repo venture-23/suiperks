@@ -40,7 +40,7 @@ module oxdao::auction {
         highest_bidder: Option<address>,
         settled: bool, 
     }
-    
+
     public fun create_auction<T>(
         reserve_price: u64, clock: &Clock, ctx: &mut TxContext
     ) {
@@ -59,5 +59,28 @@ module oxdao::auction {
             settled: false,
         };
         transfer::public_share_object(auction);
+    }
+
+    public fun bid<T>(auction: &mut AuctionInfo<T>, clock: &Clock, coin: Coin<T>, ctx: &mut TxContext){
+        assert!(clock::timestamp_ms(clock) < auction.end_time, EAuctionEnded);
+        assert!(coin::value(&coin) >= auction.reserve_price, ELessthanReservePrice);
+        let current_bid = auction.amount + ((auction.amount * auction.min_bid_increment_percentage)/ 100);
+        assert!(coin::value(&coin) >= current_bid, ELessThanLastBidByMinBidIncPercentage);
+        if(option::is_some(&auction.highest_bidder)){
+            let lastbidder = option::destroy_some(auction.highest_bidder);
+            let refund_amount = table::remove(&mut auction.funds, lastbidder);
+            debug::print(&refund_amount);
+            transfer::public_transfer(coin::from_balance(refund_amount, ctx), lastbidder);
+        };
+        let sender = tx_context::sender(ctx);
+        auction.amount = coin::value(&coin);  
+        table::add(&mut auction.funds, sender, coin::into_balance(coin));
+        auction.highest_bidder = option::some(sender);
+        let next_bid_amount = auction.amount + ((auction.amount * auction.min_bid_increment_percentage)/ 100);
+        event::emit(AuctionEvent{
+            next_auction_amount: next_bid_amount, 
+            highest_bidder: sender
+        });
+        debug::print(&auction.highest_bidder);
     }
 }
