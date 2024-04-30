@@ -40,4 +40,24 @@ module oxdao::auction {
         highest_bidder: Option<address>,
         settled: bool, 
     }
+    
+    public fun create_auction<T>(
+        reserve_price: u64, clock: &Clock, ctx: &mut TxContext
+    ) {
+        // need to handle by cap later 
+        // who can create the auction 
+        let auction = AuctionInfo<T> {
+            id: object::new(ctx),
+            amount: 0u64, 
+            reserve_price,
+            duration: 60000u64, 
+            start_time: clock::timestamp_ms(clock), 
+            end_time: clock::timestamp_ms(clock) + 600000u64, 
+            min_bid_increment_percentage: 5u64,
+            funds: table::new(ctx),
+            highest_bidder: option::none(),
+            settled: false,
+        };
+        transfer::public_share_object(auction);
+    }
 }
