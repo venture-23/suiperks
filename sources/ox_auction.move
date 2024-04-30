@@ -83,4 +83,14 @@ module oxdao::auction {
         });
         debug::print(&auction.highest_bidder);
     }
+    public fun settle_bid<T>(name: String, description: String, url: String, treasury: &mut DaoTreasury, auction: &mut AuctionInfo<T>, clock: &Clock, ctx: &mut TxContext) {
+        assert!(clock::timestamp_ms(clock) > auction.end_time, EAuctionNotEnded);
+        assert!(table::length(&auction.funds) == 1, ETableSizeNotEqualtoOne);
+        let winner = option::borrow(&auction.highest_bidder);
+        debug::print(winner);
+        let amount = table::remove(&mut auction.funds, *winner);
+        treasury::deposite_coin_from_auction(treasury, coin::from_balance(amount, ctx));
+        let nft = oxdao_nft::create_nft(name,description, url, ctx); 
+        transfer::public_transfer(nft, *winner);
+    }
 }
