@@ -1,0 +1,2 @@
+export let packageId = '0xc5937be22414777e61c643f443d4a49eddb7d90c9eacdb758f5959d738cdbd9f';
+export let AuctionInfo = '0x8aad07651ee09e25e2524fe5f1465b6e56c2022a7825a470db4e719d2e26cdcf';
