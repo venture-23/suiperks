@@ -1,5 +1,5 @@
 module oxdao::oxdao_nft {
-    use std::string::{Self, utf8, String};
+    use std::string::{utf8, String};
     use sui::event;
     use sui::package;
     use sui::display;
