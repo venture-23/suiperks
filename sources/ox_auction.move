@@ -1,10 +1,8 @@
 module oxdao::auction {
-    use std::option::{Self, Option};
     use sui::coin::{Self, Coin}; 
-    use sui::sui::SUI;
     use sui::table::{Self, Table};
-    use std::string::{Self, String};
-    use sui::balance::{Self, Balance};
+    use std::string::{ String};
+    use sui::balance::{ Balance};
     use sui::clock::{Self, Clock}; 
     use sui::event;
     use oxdao::oxdao_nft::{Self};
@@ -17,13 +15,18 @@ module oxdao::auction {
     const EAuctionNotEnded: u64 = 3; 
     const ETableSizeNotEqualtoOne: u64 = 4; 
 
-    public struct Treasury<phantom T> has key, store {
-        id: UID,
-        name: String,
-        treasury_amount: Balance<T>,
+    public struct AuctionInfoEvent has copy, drop {
+        auction_id: ID,
+        amount: u64,
+        reserve_price: u64, 
+        duration: u64, // for how long 
+        start_time: u64,
+        end_time: u64, 
+        min_bid_increment_percentage: u64,
     }
 
     public struct AuctionEvent has copy, drop { 
+        current_bid_amount: u64,
         next_auction_amount: u64,
         highest_bidder: address,  
     }
@@ -58,6 +61,15 @@ module oxdao::auction {
             highest_bidder: option::none(),
             settled: false,
         };
+        event::emit(AuctionInfoEvent{
+            auction_id: object::uid_to_inner(&auction.id), 
+            amount: auction.amount,
+            reserve_price: auction.reserve_price, 
+            duration: auction.duration, // for how long 
+            start_time: auction.start_time,
+            end_time: auction.end_time, 
+            min_bid_increment_percentage: auction.min_bid_increment_percentage,
+        });
         transfer::public_share_object(auction);
     }
 
@@ -73,11 +85,13 @@ module oxdao::auction {
             transfer::public_transfer(coin::from_balance(refund_amount, ctx), lastbidder);
         };
         let sender = tx_context::sender(ctx);
+        let coin_value = coin::value(&coin);
         auction.amount = coin::value(&coin);  
         table::add(&mut auction.funds, sender, coin::into_balance(coin));
         auction.highest_bidder = option::some(sender);
         let next_bid_amount = auction.amount + ((auction.amount * auction.min_bid_increment_percentage)/ 100);
         event::emit(AuctionEvent{
+            current_bid_amount:  coin_value,
             next_auction_amount: next_bid_amount, 
             highest_bidder: sender
         });
@@ -91,6 +105,7 @@ module oxdao::auction {
         let amount = table::remove(&mut auction.funds, *winner);
         treasury::deposite_coin_from_auction(treasury, coin::from_balance(amount, ctx));
         let nft = oxdao_nft::create_nft(name,description, url, ctx); 
+        auction.settled = true;
         transfer::public_transfer(nft, *winner);
     }
 }
