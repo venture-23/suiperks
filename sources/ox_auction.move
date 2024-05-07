@@ -26,6 +26,7 @@ module oxdao::auction {
     }
 
     public struct AuctionEvent has copy, drop { 
+        auction_id: ID,
         current_bid_amount: u64,
         next_auction_amount: u64,
         highest_bidder: address,  
@@ -91,6 +92,7 @@ module oxdao::auction {
         auction.highest_bidder = option::some(sender);
         let next_bid_amount = auction.amount + ((auction.amount * auction.min_bid_increment_percentage)/ 100);
         event::emit(AuctionEvent{
+            auction_id: object::uid_to_inner(&auction.id),
             current_bid_amount:  coin_value,
             next_auction_amount: next_bid_amount, 
             highest_bidder: sender
