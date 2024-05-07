@@ -21,6 +21,10 @@ module oxdao::treasury {
         user: address
     }
 
+    public struct DaoTreasuryEvent has copy, store, drop {
+        total_amount: u64,
+    }
+
     fun init(ctx:&mut TxContext) {
         transfer::share_object(DaoTreasury {
             id: object::new(ctx),
@@ -38,7 +42,10 @@ module oxdao::treasury {
         } else {
         balance::join(bag::borrow_mut<TypeName, Balance<T>>(&mut treasury.coins, key), coin::into_balance(token));
         };
-
+        let present_value = balance::value(bag::borrow_mut<TypeName, Balance<T>>(&mut treasury.coins, key)) + value;
+        emit(DaoTreasuryEvent{
+           total_amount: present_value 
+        });
         emit(DepositedCoin{ value, coin_type: key});
     }
 
