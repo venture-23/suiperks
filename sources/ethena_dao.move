@@ -7,10 +7,20 @@ module oxdao::ethena_dao {
     use sui::clock::{Self, Clock};
     use sui::dynamic_object_field as ofield;
 
+    const STATUS_PENDING: u8 = 0;
+    const STATUS_ACTIVE: u8 = 1;
+    const STATUS_NOT_PASSED: u8 = 2;
+    const STATUS_AGREED: u8 = 3;
+    const STATUS_QUEUED: u8 = 4;
+    const STATUS_EXECUTABLE: u8 = 5;
+    const STATUS_FINISHED: u8 = 6;
+
     const EInvalidQuorumRate: u64 = 1;
     const EActionDelayTooShort: u64 = 2;
     const EEmptyHash: u64 = 3;
     const EMinQuorumVotesTooSmall: u64 = 4;
+    const EAlreadyVoted: u64 = 5;
+    const EProposalMustBeActive: u64 = 6;
 
     public struct Dao has key, store {
         id: UID,
@@ -136,4 +146,119 @@ module oxdao::ethena_dao {
         let proposal_id = object::id(&proposal);
         ofield::add(&mut dao.id, proposal_id, proposal);
     }
+
+    fun get_proposal_detail(proposal_id: ID, dao: &Dao): &Proposal{
+        ofield::borrow<ID, Proposal>(&dao.id, proposal_id)
+    } 
+
+    public fun proposer(proposal_id: ID, dao: &Dao): address{
+        get_proposal_detail(proposal_id, dao).proposer
+    }
+
+    public fun start_time(proposal_id: ID, dao: &Dao): u64 {
+        get_proposal_detail(proposal_id, dao).start_time
+    } 
+
+    public fun end_time(proposal_id: ID, dao: &Dao): u64 {
+        get_proposal_detail(proposal_id, dao).end_time
+    }     
+
+    public fun for_votes(proposal_id: ID, dao: &Dao): u64 {
+        get_proposal_detail(proposal_id, dao).for_votes
+    }   
+
+    public fun against_votes(proposal_id: ID, dao: &Dao): u64 {
+        get_proposal_detail(proposal_id, dao).against_votes
+    } 
+
+    public fun for_voters_list(proposal_id: ID, dao: &Dao): vector<ID> {
+        get_proposal_detail(proposal_id, dao).for_voters_list
+    }   
+
+    public fun against_voters_list(proposal_id: ID, dao: &Dao): vector<ID> {
+        get_proposal_detail(proposal_id, dao).against_voters_list
+    }  
+
+    public fun eta(proposal_id: ID, dao: &Dao): u64 {
+        get_proposal_detail(proposal_id, dao).eta
+    }   
+
+    public fun action_delay(proposal_id: ID, dao: &Dao): u64 {
+        get_proposal_detail(proposal_id, dao).action_delay
+    }
+
+    public fun quorum_votes(proposal_id: ID, dao: &Dao): u64 {
+        get_proposal_detail(proposal_id, dao).quorum_votes
+    }           
+
+    public fun voting_quorum_rate(proposal_id: ID, dao: &Dao): u64 {
+        get_proposal_detail(proposal_id, dao).voting_quorum_rate
+    }
+
+    public fun hash(proposal_id: ID, dao: &Dao): String {
+        get_proposal_detail(proposal_id, dao).hash
+    } 
+
+    public fun seek_amount(proposal_id: ID, dao: &Dao): u64 {
+        get_proposal_detail(proposal_id, dao).seek_amount
+    }  
+
+    public fun executable(proposal_id: ID, dao: &Dao): bool {
+        get_proposal_detail(proposal_id, dao).executable
+    }
+
+    // Voting
+
+    fun get_mutable_proposal_detail(proposal_id: ID, dao: &mut Dao): &mut Proposal{
+        ofield::borrow_mut<ID, Proposal>(&mut dao.id, proposal_id)
+    } 
+
+    public fun cast_vote(
+        dao: &mut Dao,
+        proposal_id: ID,
+        nft: &OxDaoNFT,
+        c: &Clock,
+        agree: bool,
+    ){
+        // needs to check proposal state before casting vote
+        assert!(proposal_state_impl(dao, proposal_id, clock::timestamp_ms(c)) == STATUS_ACTIVE, EProposalMustBeActive);
+        let nft_id = object::id(nft);
+        assert!(!vector::contains(&for_voters_list(proposal_id, dao), &nft_id), EAlreadyVoted);
+        assert!(!vector::contains(&against_voters_list(proposal_id, dao), &nft_id), EAlreadyVoted);
+        let proposal_data = get_mutable_proposal_detail(proposal_id, dao);
+        if (agree){ 
+            proposal_data.for_votes = proposal_data.for_votes + 1;
+            vector::push_back(&mut proposal_data.for_voters_list, nft_id);
+        } else {
+            proposal_data.against_votes = proposal_data.against_votes + 1;
+            vector::push_back(&mut proposal_data.against_voters_list, nft_id);
+        };
+    }
+
+    fun proposal_state_impl(
+        dao: &Dao,
+        proposal_id: ID,
+        current_time: u64,
+    ): u8 {
+        if (current_time < start_time(proposal_id, dao)) {
+        STATUS_PENDING
+        } else if (current_time <= end_time(proposal_id, dao)) {
+        STATUS_ACTIVE
+        } else if (
+        for_votes(proposal_id, dao) + against_votes(proposal_id, dao) == 0 ||
+        for_votes(proposal_id, dao)  <= against_votes(proposal_id, dao) ||
+        for_votes(proposal_id, dao)  + against_votes(proposal_id, dao) < quorum_votes(proposal_id, dao) || 
+        voting_quorum_rate(proposal_id, dao) > (for_votes(proposal_id, dao)  / for_votes(proposal_id, dao)  + against_votes(proposal_id, dao))
+        ) {
+        STATUS_NOT_PASSED
+        } else if (eta(proposal_id, dao) == 0) {
+        STATUS_AGREED
+        } else if (current_time < eta(proposal_id, dao)) {
+        STATUS_QUEUED
+        } else if (executable(proposal_id, dao)) {
+        STATUS_EXECUTABLE
+        } else {
+        STATUS_FINISHED
+        }
+    } 
 }
