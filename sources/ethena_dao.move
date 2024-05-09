@@ -21,6 +21,7 @@ module oxdao::ethena_dao {
     const EMinQuorumVotesTooSmall: u64 = 4;
     const EAlreadyVoted: u64 = 5;
     const EProposalMustBeActive: u64 = 6;
+    const ENotVoted: u64 = 7;
 
     public struct Dao has key, store {
         id: UID,
@@ -232,6 +233,50 @@ module oxdao::ethena_dao {
         } else {
             proposal_data.against_votes = proposal_data.against_votes + 1;
             vector::push_back(&mut proposal_data.against_voters_list, nft_id);
+        };
+    }
+
+    public fun change_vote(
+        dao: &mut Dao,
+        proposal_id: ID,
+        nft: &OxDaoNFT,
+        c: &Clock,
+    ) {
+        assert!(proposal_state_impl(dao, proposal_id, clock::timestamp_ms(c)) == STATUS_ACTIVE, EProposalMustBeActive);
+        let nft_id = object::id(nft);
+        assert!(vector::contains(&for_voters_list(proposal_id, dao), &nft_id) || vector::contains(&against_voters_list(proposal_id, dao), &nft_id), ENotVoted);
+        if (vector::contains(&against_voters_list(proposal_id, dao), &nft_id)) {
+            let proposal_data = get_mutable_proposal_detail(proposal_id, dao);
+            proposal_data.against_votes = proposal_data.against_votes - 1;
+            proposal_data.for_votes = proposal_data.for_votes + 1;
+            vector::push_back(&mut proposal_data.for_voters_list, nft_id);
+        } else {
+            let proposal_data = get_mutable_proposal_detail(proposal_id, dao);
+            proposal_data.for_votes = proposal_data.for_votes - 1;
+            proposal_data.against_votes = proposal_data.against_votes + 1;
+            vector::push_back(&mut proposal_data.against_voters_list, nft_id);
+        };  
+    }
+
+    public fun revoke_vote(
+        dao: &mut Dao,
+        proposal_id: ID,
+        nft: &OxDaoNFT,
+        c: &Clock,
+    ){
+        assert!(proposal_state_impl(dao, proposal_id, clock::timestamp_ms(c)) == STATUS_ACTIVE, EProposalMustBeActive);
+        let nft_id = object::id(nft);
+        assert!(vector::contains(&for_voters_list(proposal_id, dao), &nft_id) || vector::contains(&against_voters_list(proposal_id, dao), &nft_id), ENotVoted);
+        if (vector::contains(&for_voters_list(proposal_id, dao), &nft_id)) {
+            let proposal_data = get_mutable_proposal_detail(proposal_id, dao);
+            proposal_data.for_votes = proposal_data.for_votes - 1;
+            let (_, index) = vector::index_of(&proposal_data.for_voters_list, &nft_id);
+            vector::remove(&mut proposal_data.for_voters_list, index);
+        } else {
+            let proposal_data = get_mutable_proposal_detail(proposal_id, dao);
+            proposal_data.against_votes = proposal_data.against_votes - 1;
+            let (_, index) = vector::index_of(&proposal_data.against_voters_list, &nft_id);
+            vector::remove(&mut proposal_data.against_voters_list, index);
         };
     }
 
