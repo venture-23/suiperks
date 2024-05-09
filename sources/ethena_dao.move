@@ -6,6 +6,7 @@ module oxdao::ethena_dao {
     use oxdao::oxdao_nft::{OxDaoNFT};
     use sui::clock::{Self, Clock};
     use sui::dynamic_object_field as ofield;
+    use oxdao::treasury::{Self as dao_treasury, DaoTreasury};
 
     const STATUS_PENDING: u8 = 0;
     const STATUS_ACTIVE: u8 = 1;
@@ -22,6 +23,11 @@ module oxdao::ethena_dao {
     const EAlreadyVoted: u64 = 5;
     const EProposalMustBeActive: u64 = 6;
     const ENotVoted: u64 = 7;
+    const EProposalNotPassed: u64 = 8;
+    const ECannotExecuteThisProposal: u64 = 9;
+    const ETooEarlyToExecute: u64 = 10;
+    const EAlreadyQueued: u64 = 11;
+    const EAlreadyExecuted: u64 = 12;
 
     public struct Dao has key, store {
         id: UID,
@@ -306,4 +312,37 @@ module oxdao::ethena_dao {
         STATUS_FINISHED
         }
     } 
+
+     public fun queue(
+        dao: &mut Dao,
+        proposal_id: ID, 
+        c: &Clock
+    ) {
+        // Only agreed proposal can be submitted.
+        let now = clock::timestamp_ms(c);
+        assert!(!table::contains(&dao.queued_proposal, proposal_id), EAlreadyQueued);
+        assert!(proposal_state_impl(dao, proposal_id, now) == STATUS_AGREED, EProposalNotPassed);
+        let proposal_data = get_mutable_proposal_detail(proposal_id, dao);
+        proposal_data.eta = now + proposal_data.action_delay;
+        table::add(queued_proposal(dao), proposal_id, true);
+    }
+
+    public fun execute<T: key + store>(
+        dao: &mut Dao,
+        proposal_id: ID, 
+        treasury: &mut DaoTreasury,
+        c: &Clock,
+        ctx: &mut TxContext
+    ){
+        let now = clock::timestamp_ms(c);
+        assert!(proposal_state_impl(dao, proposal_id, now) == STATUS_EXECUTABLE, ECannotExecuteThisProposal);
+        assert!(now >= end_time(proposal_id, dao) + action_delay(proposal_id, dao), ETooEarlyToExecute);
+        assert!(!table::contains(&dao.executed_proposal, proposal_id), EAlreadyExecuted);
+        // call friend function to transfer amount from treasury to proposer creator
+        let seek_amount = seek_amount(proposal_id, dao);
+        let proposer = proposer(proposal_id, dao);
+        let coin = dao_treasury::transfer<T>(treasury, seek_amount, proposer, ctx);
+        sui::transfer::public_transfer(coin, proposer);
+        table::add(executed_proposal(dao), proposal_id, true);
+    }
 }
