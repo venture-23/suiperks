@@ -7,6 +7,7 @@ module oxdao::ethena_dao {
     use sui::clock::{Self, Clock};
     use sui::dynamic_object_field as ofield;
     use oxdao::treasury::{Self as dao_treasury, DaoTreasury};
+    use sui::event::emit;
 
     const STATUS_PENDING: u8 = 0;
     const STATUS_ACTIVE: u8 = 1;
@@ -60,6 +61,67 @@ module oxdao::ethena_dao {
         executable: bool,
     }
 
+    public struct CreateDao has copy, drop {
+        dao_id: ID,
+        voting_delay: u64,
+        voting_period: u64,
+        voting_quorum_rate: u64,
+        min_action_delay: u64,
+        min_quorum_votes: u64
+    }
+
+    public struct NewProposal has copy, drop {
+        proposal_id: ID,
+        proposer: address,
+        start_time: u64,
+        end_time: u64,
+        for_votes: u64,
+        against_votes: u64,
+        for_voters_list: vector<ID>,
+        against_voters_list: vector<ID>,
+        eta: u64, 
+        action_delay: u64, 
+        quorum_votes: u64, 
+        voting_quorum_rate: u64, 
+        hash: String,
+        seek_amount: u64,
+        executable: bool,
+    }
+
+    public struct CastVote has copy, drop {
+        voter: address,
+        proposal_id: ID,
+        nft: ID,
+        vote_period: u64,
+        agree: bool,
+    }
+
+    public struct ChangeVote has copy, drop {
+        voter: address,
+        proposal_id: ID,
+        nft: ID,
+        vote_period: u64,
+        agree: bool,
+    }
+
+    public struct RevokeVote has copy, drop {
+        voter: address,
+        proposal_id: ID,
+        nft: ID,
+        vote_period: u64,
+    }
+
+    public struct QueuedProposal has copy, drop {
+        proposal_id: ID,
+        queue_period: u64,
+    }
+
+    public struct ExecuteProposal has copy, drop {
+        proposal_id: ID,
+        amount: u64,
+        queue_period: u64,
+    }
+
     // this function needs to be called only once
     public fun create_dao(
         voting_delay: u64, 
@@ -81,8 +143,19 @@ module oxdao::ethena_dao {
             queued_proposal: table::new(ctx),
             executed_proposal: table::new(ctx),
         };
+        emit(
+        CreateDao{
+        dao_id: object::id(&dao),
+        voting_delay,
+        voting_period,
+        voting_quorum_rate,
+        min_action_delay,
+        min_quorum_votes
+        }
+        );
         transfer::share_object(dao);
     }
+
 
     // === Public Dao View Functions ===  
     public fun voting_delay(self: &Dao): u64 {
@@ -146,11 +219,29 @@ module oxdao::ethena_dao {
             seek_amount,
             executable: false,
         };
+        
         proposal
     }
 
     public fun add_proposal_dynamically(dao: &mut Dao, proposal: Proposal) {
         let proposal_id = object::id(&proposal);
+        emit (NewProposal{
+            proposal_id: object::id(&proposal),
+            proposer: proposal.proposer,
+            start_time: proposal.start_time,
+            end_time: proposal.end_time,
+            for_votes: proposal.for_votes,
+            against_votes: proposal.against_votes,
+            for_voters_list: proposal.for_voters_list,
+            against_voters_list: proposal.against_voters_list,
+            eta: proposal.eta,
+            action_delay: proposal.action_delay,
+            quorum_votes: proposal.quorum_votes,
+            voting_quorum_rate: proposal.voting_quorum_rate,
+            hash: proposal.hash,
+            seek_amount: proposal.seek_amount,
+            executable:proposal.executable,
+        });
         ofield::add(&mut dao.id, proposal_id, proposal);
     }
 
@@ -226,6 +317,7 @@ module oxdao::ethena_dao {
         nft: &OxDaoNFT,
         c: &Clock,
         agree: bool,
+        ctx:&mut TxContext,
     ){
         // needs to check proposal state before casting vote
         assert!(proposal_state_impl(dao, proposal_id, clock::timestamp_ms(c)) == STATUS_ACTIVE, EProposalMustBeActive);
@@ -240,6 +332,13 @@ module oxdao::ethena_dao {
             proposal_data.against_votes = proposal_data.against_votes + 1;
             vector::push_back(&mut proposal_data.against_voters_list, nft_id);
         };
+        emit(CastVote{
+            voter: tx_context::sender(ctx),
+            proposal_id,
+            nft: nft_id,
+            vote_period: c.timestamp_ms(),
+            agree,
+        });
     }
 
     public fun change_vote(
@@ -247,6 +346,7 @@ module oxdao::ethena_dao {
         proposal_id: ID,
         nft: &OxDaoNFT,
         c: &Clock,
+        ctx: &mut TxContext
     ) {
         assert!(proposal_state_impl(dao, proposal_id, clock::timestamp_ms(c)) == STATUS_ACTIVE, EProposalMustBeActive);
         let nft_id = object::id(nft);
@@ -256,12 +356,27 @@ module oxdao::ethena_dao {
             proposal_data.against_votes = proposal_data.against_votes - 1;
             proposal_data.for_votes = proposal_data.for_votes + 1;
             vector::push_back(&mut proposal_data.for_voters_list, nft_id);
+            emit(ChangeVote{
+                voter: tx_context::sender(ctx),
+                proposal_id,
+                nft: nft_id,
+                vote_period: c.timestamp_ms(),
+                agree: true
+            }); 
         } else {
             let proposal_data = get_mutable_proposal_detail(proposal_id, dao);
             proposal_data.for_votes = proposal_data.for_votes - 1;
             proposal_data.against_votes = proposal_data.against_votes + 1;
             vector::push_back(&mut proposal_data.against_voters_list, nft_id);
-        };  
+            emit(ChangeVote{
+                voter: tx_context::sender(ctx),
+                proposal_id,
+                nft: nft_id,
+                vote_period: c.timestamp_ms(),
+                agree: false,
+            }); 
+        }; 
+        
     }
 
     public fun revoke_vote(
@@ -269,6 +384,7 @@ module oxdao::ethena_dao {
         proposal_id: ID,
         nft: &OxDaoNFT,
         c: &Clock,
+        ctx: &mut TxContext
     ){
         assert!(proposal_state_impl(dao, proposal_id, clock::timestamp_ms(c)) == STATUS_ACTIVE, EProposalMustBeActive);
         let nft_id = object::id(nft);
@@ -284,6 +400,12 @@ module oxdao::ethena_dao {
             let (_, index) = vector::index_of(&proposal_data.against_voters_list, &nft_id);
             vector::remove(&mut proposal_data.against_voters_list, index);
         };
+        emit(RevokeVote{
+                voter: tx_context::sender(ctx),
+                proposal_id: proposal_id,
+                nft: nft_id,
+                vote_period: c.timestamp_ms(),
+        });
     }
 
     fun proposal_state_impl(
@@ -325,6 +447,10 @@ module oxdao::ethena_dao {
         let proposal_data = get_mutable_proposal_detail(proposal_id, dao);
         proposal_data.eta = now + proposal_data.action_delay;
         table::add(queued_proposal(dao), proposal_id, true);
+        emit(QueuedProposal{
+            proposal_id,
+            queue_period: c.timestamp_ms()
+        });
     }
 
     public fun execute<T: key + store>(
@@ -344,5 +470,10 @@ module oxdao::ethena_dao {
         let coin = dao_treasury::transfer<T>(treasury, seek_amount, proposer, ctx);
         sui::transfer::public_transfer(coin, proposer);
         table::add(executed_proposal(dao), proposal_id, true);
+        emit(ExecuteProposal{
+            proposal_id,
+            amount: seek_amount,
+            queue_period: c.timestamp_ms(),
+        });
     }
 }
