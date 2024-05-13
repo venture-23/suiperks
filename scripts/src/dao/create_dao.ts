@@ -11,7 +11,7 @@ async function create_event() {
     const tx = new TransactionBlock();  
 
     tx.moveCall({
-        target: `${packageId}::dao::create_dao`,
+        target: `${packageId}::ethena_dao::create_dao`,
         arguments: [
             tx.pure.u64(1*60*1000), // voting _delay 
             tx.pure.u64(3*60*1000), // voting period 
@@ -47,7 +47,7 @@ async function create_event() {
     for (let i = 0; i < output.length; i++) {
         const item = output[i];
         if (await item.type === 'created') {
-            if (await item.objectType === `${packageId}::dao::Dao`) {
+            if (await item.objectType === `${packageId}::ethena_dao::Dao`) {
                Dao = String(item.objectId);
             }
         }

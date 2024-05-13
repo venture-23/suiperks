@@ -12,7 +12,7 @@ async function create_proposal() {
     const { keypair, client } = getExecStuff();
     const tx = new TransactionBlock();
     let proposal = tx.moveCall({
-        target: `${packageId}::dao::propose`,
+        target: `${packageId}::ethena_dao::propose`,
         arguments: [
             tx.object(Dao),  // Dao<DaoWitness>
             tx.object(NftId), // 0xDaoNFT, 
@@ -24,7 +24,7 @@ async function create_proposal() {
         ],
     });
     tx.moveCall({
-        target: `${packageId}::dao::add_proposal_dynamically`,
+        target: `${packageId}::ethena_dao::add_proposal_dynamically`,
         arguments: [
             tx.object(Dao), 
             proposal
@@ -54,7 +54,7 @@ async function create_proposal() {
     for (let i = 0; i < output.length; i++) {
         const item = output[i];
         if (await item.type === 'created') {
-            if (await item.objectType === `${packageId}::dao::Proposal`) {
+            if (await item.objectType === `${packageId}::ethena_dao::Proposal`) {
                ProposalId = String(item.objectId);
             }
         }

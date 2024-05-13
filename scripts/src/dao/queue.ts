@@ -11,10 +11,10 @@ async function queue() {
     const tx = new TransactionBlock();
 
     tx.moveCall({
-        target: `${packageId}::dao::queue`,
+        target: `${packageId}::ethena_dao::queue`,
         arguments: [
             tx.object(Dao),
-            tx.pure.address("0x701301c564fbc2522b3cc9c3cb9bc0ca2474d461a6344b0b73db31f10c30e713"), // Proposal<DaoWitness> 
+            tx.pure.address("0x078a46216dbb57812c170db50b06b04cf4ac85ec7fd35f66eba5ef975fb24752"), // Proposal<DaoWitness> 
             tx.object(SUI_CLOCK_OBJECT_ID), // clock
 
         ],
