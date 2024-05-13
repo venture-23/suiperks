@@ -18,9 +18,9 @@ module oxdao::ethena_dao {
     const STATUS_FINISHED: u8 = 6;
 
     const EInvalidQuorumRate: u64 = 1;
-    const EActionDelayTooShort: u64 = 2;
+    // const EActionDelayTooShort: u64 = 2;
     const EEmptyHash: u64 = 3;
-    const EMinQuorumVotesTooSmall: u64 = 4;
+    // const EMinQuorumVotesTooSmall: u64 = 4;
     const EAlreadyVoted: u64 = 5;
     const EProposalMustBeActive: u64 = 6;
     const ENotVoted: u64 = 7;
@@ -32,10 +32,15 @@ module oxdao::ethena_dao {
 
     public struct Dao has key, store {
         id: UID,
+        // time for voters to wait to vote in a proposal
         voting_delay: u64,
+        // voting duration of a proposal
         voting_period: u64,
+        // min quorum rate to pass a proposal
         voting_quorum_rate: u64,
+        // time for proposal to wait to execute it
         min_action_delay: u64, 
+        // min votes for a proposal to be successfull even if it is higher than the against votes and the quorum rate.
         min_quorum_votes: u64,
         proposals_data: Table<ID, address>,
         queued_proposal: Table<ID, bool>,
@@ -190,14 +195,14 @@ module oxdao::ethena_dao {
         dao: &mut Dao,
         _nft: &OxDaoNFT,
         c: &Clock,
-        action_delay: u64,
-        quorum_votes: u64,
+        // action_delay: u64,
+        // quorum_votes: u64,
         hash: String,
         seek_amount: u64,
         ctx: &mut TxContext    
     ): Proposal{
-        assert!(action_delay >= dao.min_action_delay, EActionDelayTooShort);
-        assert!(quorum_votes >= dao.min_quorum_votes, EMinQuorumVotesTooSmall);
+        // assert!(action_delay >= dao.min_action_delay, EActionDelayTooShort);
+        // assert!(quorum_votes >= dao.min_quorum_votes, EMinQuorumVotesTooSmall);
         assert!(string::length(&hash) != 0, EEmptyHash);
 
         let start_time = clock::timestamp_ms(c) + dao.voting_delay;
@@ -212,8 +217,8 @@ module oxdao::ethena_dao {
             for_voters_list: vector::empty(),
             against_voters_list: vector::empty(),
             eta: 0,
-            action_delay,
-            quorum_votes,
+            action_delay: dao.min_action_delay,
+            quorum_votes: dao.min_quorum_votes,
             voting_quorum_rate: dao.voting_quorum_rate,
             hash,
             seek_amount,
