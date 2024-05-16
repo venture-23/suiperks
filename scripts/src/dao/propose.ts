@@ -16,10 +16,8 @@ async function create_proposal() {
         arguments: [
             tx.object(Dao),  // Dao<DaoWitness>
             tx.object(NftId), // 0xDaoNFT, 
-            tx.object(SUI_CLOCK_OBJECT_ID), // Clock 
-            tx.pure.u64(1*60*1000), // action_delay
-            tx.pure.u64(4), // quorum_votes, 
-            tx.pure.string('hash'), // hash proposal title/content
+            tx.object(SUI_CLOCK_OBJECT_ID), // quorum_votes, 
+            tx.pure.string('754f32722ce2c9de3117a9273080bc58689b3846baada394ba352be3'), // hash proposal title/content
             tx.pure.u64(100000), // seek_amount
         ],
     });
