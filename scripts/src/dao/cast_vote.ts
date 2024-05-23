@@ -14,10 +14,10 @@ async function cast_vote() {
         target: `${packageId}::ethena_dao::cast_vote`,
         arguments: [
             tx.object(Dao),
-            tx.pure.address("0x078a46216dbb57812c170db50b06b04cf4ac85ec7fd35f66eba5ef975fb24752"), // Proposal<DaoWitness> 
+            tx.pure.address("0x1b3df18cbb35c8d7e8b69e767be1db529c93181404edf0740607a3f0f203fe90"), // Proposal<DaoWitness> 
             tx.object(NftId), // 0xDaoNft
             tx.object(SUI_CLOCK_OBJECT_ID), // clock
-            tx.pure.bool(true), // yes or no vote 
+            tx.pure.bool(false), // yes or no vote 
 
         ],
     });

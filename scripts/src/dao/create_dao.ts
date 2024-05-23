@@ -14,8 +14,8 @@ async function create_event() {
         target: `${packageId}::ethena_dao::create_dao`,
         arguments: [
             tx.pure.u64(1*60*1000), // voting _delay 
-            tx.pure.u64(3*60*1000), // voting period 
-            tx.pure.u64(1_000_000_000), // voting_quorun_rate
+            tx.pure.u64(8*60*1000), // voting period 
+            tx.pure.u64(3), // voting_quorun_rate
             tx.pure.u64(1*60*1000),//  min_action_delay
             tx.pure.u64(4), // min_quorum_votes
         ],

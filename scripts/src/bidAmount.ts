@@ -53,4 +53,4 @@ async function bid_auction(amount: number) {
     // console.log(`AuctionInfo: ${AuctionInfo}`);
 }
 
-bid_auction(110250000);
+bid_auction(100000000);

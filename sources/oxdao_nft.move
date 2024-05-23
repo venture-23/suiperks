@@ -3,6 +3,7 @@ module oxdao::oxdao_nft {
     use sui::event;
     use sui::package;
     use sui::display;
+    use sui::dynamic_field::{Self as df};
     
     public struct OXDAO_NFT has drop { }
     
@@ -70,5 +71,34 @@ module oxdao::oxdao_nft {
             name: nft.name,
         });
         nft
+    }
+    #[allow(lint(self_transfer))]
+    public fun mint_nft(
+        name: String, 
+        description: String,
+        url: String,
+        ctx: &mut TxContext
+    ){
+        let nft = OxDaoNFT {
+            id: object::new(ctx),
+            name,
+            description,
+            url        
+        };
+        let sender = tx_context::sender(ctx);
+        event::emit(OxDaoNFTEvent {
+            object_id: object::uid_to_inner(&nft.id),
+            creator: sender,
+            name: nft.name,
+        });
+        transfer::transfer(nft, sender);
+    }
+    public(package) fun dynamically_add_price(nft: &mut OxDaoNFT, name: String, price: u64) {
+        df::add(&mut nft.id, name, price);
+    }
+
+    public(package) fun get_price_detail(nft: &OxDaoNFT, name: String): &u64{
+        let value = df::borrow(&nft.id, name);
+        value
     }
 }

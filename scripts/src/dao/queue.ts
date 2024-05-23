@@ -14,7 +14,7 @@ async function queue() {
         target: `${packageId}::ethena_dao::queue`,
         arguments: [
             tx.object(Dao),
-            tx.pure.address("0x078a46216dbb57812c170db50b06b04cf4ac85ec7fd35f66eba5ef975fb24752"), // Proposal<DaoWitness> 
+            tx.pure.address("0x79741a833c6a7345986529e828256f640c3531762d735c3068483e814d452388"), // Proposal<DaoWitness> 
             tx.object(SUI_CLOCK_OBJECT_ID), // clock
 
         ],

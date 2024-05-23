@@ -33,7 +33,10 @@ module oxdao::treasury {
     }
 
     // @dev function will be called after nft is sold from the auction
-    public(package) fun deposite_coin_from_auction<T>(treasury: &mut DaoTreasury, token: Coin<T>) {
+    
+    // @todo for testing depositing the coin so removing the friend function 
+    //
+    public fun deposite_coin_from_auction<T>(treasury: &mut DaoTreasury, token: Coin<T>) {
         let key = type_name::get<T>();
         let value = coin::value(&token);
 
@@ -47,6 +50,12 @@ module oxdao::treasury {
            total_amount: present_value 
         });
         emit(DepositedCoin{ value, coin_type: key});
+    }
+
+    public fun get_total_treasury_balance<T>(treasury: &mut DaoTreasury): u64 {
+        let key = type_name::get<T>(); 
+        let present_value = balance::value(bag::borrow_mut<TypeName, Balance<T>>(&mut treasury.coins, key)); 
+        present_value 
     }
 
     // @dev function will only be called if dao members pass the proposal of the intended user

@@ -122,6 +122,7 @@ module oxdao::ethena_dao {
     }
 
     public struct ExecuteProposal has copy, drop {
+        dao_balance: u64, 
         proposal_id: ID,
         amount: u64,
         queue_period: u64,
@@ -426,7 +427,7 @@ module oxdao::ethena_dao {
         for_votes(proposal_id, dao) + against_votes(proposal_id, dao) == 0 ||
         for_votes(proposal_id, dao)  <= against_votes(proposal_id, dao) ||
         for_votes(proposal_id, dao)  + against_votes(proposal_id, dao) < quorum_votes(proposal_id, dao) || 
-        voting_quorum_rate(proposal_id, dao) > (for_votes(proposal_id, dao)  / for_votes(proposal_id, dao)  + against_votes(proposal_id, dao))
+        voting_quorum_rate(proposal_id, dao) > (for_votes(proposal_id, dao)  / for_votes(proposal_id, dao)  + against_votes(proposal_id, dao)) * 100
         ) {
         STATUS_NOT_PASSED
         } else if (eta(proposal_id, dao) == 0) {
@@ -458,7 +459,7 @@ module oxdao::ethena_dao {
         });
     }
 
-    public fun execute<T: key + store>(
+    public fun execute<T>(
         dao: &mut Dao,
         proposal_id: ID, 
         treasury: &mut DaoTreasury,
@@ -466,7 +467,8 @@ module oxdao::ethena_dao {
         ctx: &mut TxContext
     ){
         let now = clock::timestamp_ms(c);
-        assert!(proposal_state_impl(dao, proposal_id, now) == STATUS_EXECUTABLE, ECannotExecuteThisProposal);
+       // assert!(proposal_state_impl(dao, proposal_id, now) == STATUS_EXECUTABLE, ECannotExecuteThisProposal);
+        assert!(table::contains(&dao.queued_proposal, proposal_id), ECannotExecuteThisProposal);
         assert!(now >= end_time(proposal_id, dao) + action_delay(proposal_id, dao), ETooEarlyToExecute);
         assert!(!table::contains(&dao.executed_proposal, proposal_id), EAlreadyExecuted);
         // call friend function to transfer amount from treasury to proposer creator
@@ -475,7 +477,9 @@ module oxdao::ethena_dao {
         let coin = dao_treasury::transfer<T>(treasury, seek_amount, proposer, ctx);
         sui::transfer::public_transfer(coin, proposer);
         table::add(executed_proposal(dao), proposal_id, true);
+        let dao_balance = dao_treasury::get_total_treasury_balance<T>(treasury);
         emit(ExecuteProposal{
+            dao_balance,
             proposal_id,
             amount: seek_amount,
             queue_period: c.timestamp_ms(),

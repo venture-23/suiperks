@@ -14,7 +14,7 @@ async function execute() {
         target: `${packageId}::ethena_dao::execute`,
         arguments: [
             tx.object(Dao),
-            tx.pure.address("0x701301c564fbc2522b3cc9c3cb9bc0ca2474d461a6344b0b73db31f10c30e713"), // Proposal<DaoWitness> 
+            tx.pure.address("0x79741a833c6a7345986529e828256f640c3531762d735c3068483e814d452388"), // Proposal<DaoWitness> 
             tx.object(DaoTreasury), // clock
             tx.object(SUI_CLOCK_OBJECT_ID),
         ],
