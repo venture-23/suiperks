@@ -1,7 +1,7 @@
 import { TransactionBlock } from '@mysten/sui.js/transactions';
 import * as dotenv from 'dotenv';
 import getExecStuff from '../utils/execStuff';
-import { packageId } from '../utils/packageInfo';
+import { packageId, AuctionDetails } from '../utils/packageInfo';
 import { SUI_CLOCK_OBJECT_ID } from '@mysten/sui.js/utils';
 dotenv.config();
 
@@ -13,6 +13,7 @@ async function create_event() {
     tx.moveCall({
         target: `${packageId}::auction::create_auction`,
         arguments: [
+            tx.object(AuctionDetails),
             tx.pure.u64('100000000'),
             tx.object(SUI_CLOCK_OBJECT_ID)
         ],

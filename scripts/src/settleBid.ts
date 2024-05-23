@@ -1,7 +1,7 @@
 import { TransactionBlock } from '@mysten/sui.js/transactions';
 import * as dotenv from 'dotenv';
 import getExecStuff from '../utils/execStuff';
-import { packageId, DaoTreasury, AuctionInfo } from '../utils/packageInfo';
+import { packageId, DaoTreasury, AuctionInfo, AuctionDetails } from '../utils/packageInfo';
 import { SUI_CLOCK_OBJECT_ID } from '@mysten/sui.js/utils';
 dotenv.config();
 
@@ -13,6 +13,7 @@ async function settle_bid() {
     tx.moveCall({
         target: `${packageId}::auction::settle_bid`,
         arguments: [
+            tx.object(AuctionDetails),
             tx.pure.string('OxNFT #1'),
             tx.pure.string('random description'),
             tx.pure.string('https://cdn.leonardo.ai/users/84487ea6-407f-45f2-952f-05212bc952a4/generations/0208653b-fdf6-4bec-9c52-1b649f9262df/variations/Default_Japanese_tshirt_designs_like_tattoos_full_of_pictures_2_0208653b-fdf6-4bec-9c52-1b649f9262df_1.jpg?w=512'),

@@ -1,6 +1,7 @@
-export let packageId = '0x753959f64d99284cb8eedb3733a9f378ceb00f033384fb0dafc7b30ccc57ec41';
-export let DaoTreasury = '0x3865c0939184b6555bc368b540210febe3b874e4778ac3174afb02144f7d6fe7';
-export let AuctionInfo = '0xbc64a5b90d168a830966443875f9521ef8b100e676f30518915eb5894d3890b0';
+export let packageId = '0x88ffbd81a6e1d966097006eae7e6140ba55f20cfad83c65f86d2173a77b5e88d';
+export let DaoTreasury = '0x27cc1452decdb8c9573f0378b902e2a1f41e27f6ba90c4a7db4bc978bcc38d7c';
+export let AuctionDetails = '0xdb0b5e51f980f78dd9602b48ef8e483e1e9b3a47623f28acc1de1b602f2207df';
+export let AuctionInfo = '0xf1f5356261b89c87d0947e01544ab66fe2001020ca2235cbd9d45615fb816079';
 export let Dao = "0xd53ab4c965359aeef4eb769eeac3a0ee186dc6f9bff79db9ad8d5e1de361c850";
 export let NftId = "0xdcaa7dfe8d577a5f9c2ac2a486145695ddfede9b205d5f0588601b9a40991661";
 export let ProposalId: "0x1b3df18cbb35c8d7e8b69e767be1db529c93181404edf0740607a3f0f203fe90";

@@ -41,6 +41,7 @@ const getPackageId = async () => {
             (a) => a.type === 'published',
         ) as SuiObjectChangePublished[]) ?? [])[0].packageId.replace(/^(0x)(0+)/, '0x') as string;
         let DaoTreasury;
+        let AuctionDetails;
         // console.log(`packaged ID : ${packageId}`);
         await sleep(10000);
 
@@ -69,13 +70,17 @@ const getPackageId = async () => {
                 if (await item.objectType === `${packageId}::treasury::DaoTreasury`) {
                     DaoTreasury = String(item.objectId);
                 }
-            }
+            
+             if (await item.objectType === `${packageId}::auction::AuctionDetails`) {
+                    AuctionDetails = String(item.objectId);
+                }
         }
-        return { packageId, DaoTreasury, };
+    }
+        return { packageId, DaoTreasury, AuctionDetails};
     } catch (error) {
         // Handle potential errors if the promise rejects
         console.error(error);
-        return { packageId: '', DaoTreasury: '' };
+        return { packageId: '', DaoTreasury: '', AuctionDetails: '' };
     }
 };
 
