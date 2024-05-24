@@ -42,6 +42,9 @@ const getPackageId = async () => {
         ) as SuiObjectChangePublished[]) ?? [])[0].packageId.replace(/^(0x)(0+)/, '0x') as string;
         let DaoTreasury;
         let AuctionDetails;
+        let AdminCap; 
+        let Directory;
+        let Stats;
         // console.log(`packaged ID : ${packageId}`);
         await sleep(10000);
 
@@ -71,16 +74,25 @@ const getPackageId = async () => {
                     DaoTreasury = String(item.objectId);
                 }
             
-             if (await item.objectType === `${packageId}::auction::AuctionDetails`) {
+            if (await item.objectType === `${packageId}::auction::AuctionDetails`) {
                     AuctionDetails = String(item.objectId);
                 }
+            if (await item.objectType === `${packageId}::oxcoin::AdminCap`) {
+                    AdminCap = String(item.objectId);
+                }
+            if (await item.objectType === `${packageId}::oxcoin::Directory`) {
+                    Directory = String(item.objectId);
+            }
+            if (await item.objectType === `${packageId}::oxcoin::Stats`) {
+                    Stats = String(item.objectId);
+            }
         }
     }
-        return { packageId, DaoTreasury, AuctionDetails};
+        return { packageId, DaoTreasury, AuctionDetails, AdminCap, Directory, Stats};
     } catch (error) {
         // Handle potential errors if the promise rejects
         console.error(error);
-        return { packageId: '', DaoTreasury: '', AuctionDetails: '' };
+        return { packageId: '', DaoTreasury: '', AuctionDetails: '', AdminCap: '', Directory: '', Stats: '' };
     }
 };
 
