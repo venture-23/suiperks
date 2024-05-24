@@ -130,7 +130,7 @@ module oxdao::auction {
         debug::print(&auction.highest_bidder);
     }
     public fun settle_bid<T>(auction_details: &mut AuctionDetails,  name: String, description: String, url: String, treasury: &mut DaoTreasury, auction: &mut AuctionInfo<T>, clock: &Clock, ctx: &mut TxContext) {
-        assert!(!vec_set::contains(&auction_details.auction_created_list, &auction_details.id.uid_to_inner()), EAlreadySettledAuction);
+        assert!(!vec_set::contains(&auction_details.auction_created_list, &object::uid_to_inner(&auction.id)), EAlreadySettledAuction);
         assert!(auction_details.active == true, ENoAuctionisRunning);
         assert!(clock::timestamp_ms(clock) > auction.end_time, EAuctionNotEnded);
         if(table::length(&auction.funds) == 1){
@@ -157,7 +157,7 @@ module oxdao::auction {
             });
             add_unsold_nft_dynamically(auction_details, nft);
         };
-        vec_set::insert(&mut auction_details.auction_created_list, auction_details.id.uid_to_inner());
+        vec_set::insert(&mut auction_details.auction_created_list, object::uid_to_inner(&auction.id));
     }
 
     fun add_unsold_nft_dynamically(auction_details: &AuctionDetails, nft: OxDaoNFT ) {
