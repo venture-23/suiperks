@@ -16,7 +16,7 @@ async function settle_bid() {
             tx.object(AuctionDetails),
             tx.pure.string('OxNFT #1'),
             tx.pure.string('random description'),
-            tx.pure.string('https://cdn.leonardo.ai/users/84487ea6-407f-45f2-952f-05212bc952a4/generations/0208653b-fdf6-4bec-9c52-1b649f9262df/variations/Default_Japanese_tshirt_designs_like_tattoos_full_of_pictures_2_0208653b-fdf6-4bec-9c52-1b649f9262df_1.jpg?w=512'),
+            tx.pure.string('https://content.coolcatsnft.com/wp-content/uploads/2023/08/Blue-2.png'),
             tx.object(DaoTreasury),
             tx.object(AuctionInfo),
             tx.object(SUI_CLOCK_OBJECT_ID)
