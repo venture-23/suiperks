@@ -6,6 +6,7 @@ module oxdao::ethena_dao {
     use oxdao::oxdao_nft::{OxDaoNFT};
     use sui::clock::{Self, Clock};
     use sui::dynamic_object_field as ofield;
+    use oxdao::oxcoin::{Self, Directory};
     use oxdao::treasury::{Self as dao_treasury, DaoTreasury};
     use sui::event::emit;
 
@@ -318,6 +319,7 @@ module oxdao::ethena_dao {
     } 
 
     public fun cast_vote(
+        directory: &mut Directory,
         dao: &mut Dao,
         proposal_id: ID,
         nft: &OxDaoNFT,
@@ -338,6 +340,7 @@ module oxdao::ethena_dao {
             proposal_data.against_votes = proposal_data.against_votes + 1;
             vector::push_back(&mut proposal_data.against_voters_list, nft_id);
         };
+        oxcoin::increase_voter_vote_count(directory, nft);
         emit(CastVote{
             voter: tx_context::sender(ctx),
             proposal_id,
@@ -386,6 +389,7 @@ module oxdao::ethena_dao {
     }
 
     public fun revoke_vote(
+        directory: &mut Directory,
         dao: &mut Dao,
         proposal_id: ID,
         nft: &OxDaoNFT,
@@ -406,6 +410,7 @@ module oxdao::ethena_dao {
             let (_, index) = vector::index_of(&proposal_data.against_voters_list, &nft_id);
             vector::remove(&mut proposal_data.against_voters_list, index);
         };
+        oxcoin::decrease_voter_vote_count(directory, nft);
         emit(RevokeVote{
                 voter: tx_context::sender(ctx),
                 proposal_id: proposal_id,
