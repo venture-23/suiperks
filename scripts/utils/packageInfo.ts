@@ -1,10 +1,11 @@
-export let packageId = '0xb2afef6f4a0921a2f29ed77b4ee0d552035c2a497f631cd0ecd1f6d66cd4f327';
-export let DaoTreasury = '0x22b6952516c11a3a60bd4e5be25babb67e9e0867dc3ed7e0b179fc21ee036037';
-export let AuctionDetails = '0x8e95c3cdfd69d19154501e2dc1ce4025c3fe0b1e2bf01a4a9718b348462ebd28';
+export let packageId = '0x6e9b7acdaaa1d763555ea6b38fe37881dc461fd648042c66935bdf5da03f2513';
+export let DaoTreasury = '0xdc31ca38e0793ecea834edc99c4b0f4652cecb7d949ad7544a9ea69850aac459';
+export let AuctionDetails = '0x2c0693bfa1e669e56ca4c3601c16f4b7efc5635d0bb9d58218444211f9a8b3a4';
+export let Admincap = '0x2ba68411a75f730ed3b3be0220c43a3106f5a36d93b6ac2ebd9a125b57620eb4'; 
+export let Directory = '0xbb728b8faecc9002cc53a9dacebe5fdf9e15f183fb322a1a0def7a5ec85cdc0a';
 export let AuctionInfo = '0xd6f468020d5c583f7a6069822e7fb2ef5bf7e4d4e8d639166d030577ac8ac494';
-export let Dao = "0xd53ab4c965359aeef4eb769eeac3a0ee186dc6f9bff79db9ad8d5e1de361c850";
-export let NftId = "0xdcaa7dfe8d577a5f9c2ac2a486145695ddfede9b205d5f0588601b9a40991661";
-export let ProposalId: "0x1b3df18cbb35c8d7e8b69e767be1db529c93181404edf0740607a3f0f203fe90";
-
+export let Dao = "0x3c4cdd4e474b9d461b869b0473add4646b1ed2544857bf336a475bde7c35af71";
+export let NftId = "0xec9b15b658d637db5d9b972f5d69d2e79aa11d9712568b23ec2156c7ca1e5ba0";
+export let ProposalId: "0x54f6f317f540b227aa3b7cbc0deaaa05c3192dff52f246680341a5d8aab4cbfd";
 
 /// 0x1b1110193487e62f632aa4a3c67410050158046b77a55e9b05ca10015179964b
