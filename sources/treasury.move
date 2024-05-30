@@ -36,7 +36,7 @@ module oxdao::treasury {
     
     // @todo for testing depositing the coin so removing the friend function 
     //
-    public fun deposite_coin_from_auction<T>(treasury: &mut DaoTreasury, token: Coin<T>) {
+    public(package) fun deposite_coin_from_auction<T>(treasury: &mut DaoTreasury, token: Coin<T>) {
         let key = type_name::get<T>();
         let value = coin::value(&token);
 

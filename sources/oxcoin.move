@@ -9,6 +9,9 @@ module oxdao::oxcoin {
     //const EVoterNotExist: u64 = 101; 
     const ECannotMintMAXSUPPLY: u64 = 101;
     const ERewardClaimPause: u64 = 102;
+    const ENotEligibleForReward: u64 = 103;
+    const EAlreadyPaused: u64 = 104;
+    const EAlreadyResume: u64 = 105;
 
     public struct OXCOIN has drop {}
 
@@ -24,14 +27,15 @@ module oxdao::oxcoin {
         paused: bool, 
         total_minted: u64, 
         treasury:  TreasuryCap<OXCOIN>, 
-        top_one_list: Table<ID, u64>, 
-        top_two_list: Table<ID, u64>, 
-        top_three_list: Table<ID, u64>,
+        top_one_list: Table<address, u64>, 
+        top_two_list: Table<address, u64>, 
+        top_three_list: Table<address, u64>,
     }  
 
     public struct RewardClaimed has copy, store, drop{
-        claimed_id: ID,
-        claimed_amount: u64, 
+        claimed_id: address,
+        claimed_amount: u64,
+        total_reward_minted: u64,  
     }
 
     // == Initialization == 
@@ -66,71 +70,74 @@ module oxdao::oxcoin {
         directory: &mut Directory,
         _: &AdminCap, 
     ) {
+        assert!(directory.paused == false, EAlreadyPaused);
         directory.paused = true; 
     }
     public fun admin_resume( 
         directory: &mut Directory,
         _: &AdminCap, 
     ) {
+        assert!(directory.paused == true, EAlreadyResume);
         directory.paused = false;
     }
 
     #[allow(lint(self_transfer))]    
     public fun claim_voter_reward(
         directory: &mut Directory, 
-        nft_id: &OxDaoNFT, 
+        _nft_id: &OxDaoNFT, 
         ctx: &mut TxContext
     ){
+        let sender = tx_context::sender(ctx);
         assert!(!directory.paused, ERewardClaimPause);
-        if(table::contains(&directory.top_one_list, object::id(nft_id))){
-            let amount = table::borrow(&directory.top_one_list, object::id(nft_id));
+        assert!(table::contains(&directory.top_one_list, sender) || table::contains(&directory.top_two_list, sender) ||(table::contains(&directory.top_three_list, sender)), ENotEligibleForReward);
+        if(table::contains(&directory.top_one_list, sender)){
+            let amount = table::borrow(&directory.top_one_list, sender);
             let coin = coin::mint<OXCOIN>(&mut directory.treasury, *amount, ctx);
             let coin_value = coin::value(&coin);
             assert!(coin_value < TotalSupply, ECannotMintMAXSUPPLY);
             transfer::public_transfer(coin, ctx.sender());
-            table::remove(&mut directory.top_one_list, object::id(nft_id));
+            table::remove(&mut directory.top_one_list, sender);
             directory.total_minted = directory.total_minted + coin_value;
             event::emit(RewardClaimed{
-                claimed_id: object::id(nft_id), 
+                claimed_id: ctx.sender(), 
                 claimed_amount: coin_value,
+                total_reward_minted: directory.total_minted,
             });
         };
-        if(table::contains(&directory.top_two_list, object::id(nft_id))){
-            let amount = table::borrow(&directory.top_two_list, object::id(nft_id));
+        if(table::contains(&directory.top_two_list, sender)){
+            let amount = table::borrow(&directory.top_two_list, sender);
             let coin = coin::mint<OXCOIN>(&mut directory.treasury, *amount, ctx);
             let coin_value = coin::value(&coin);
             assert!(coin_value < TotalSupply, ECannotMintMAXSUPPLY);
             transfer::public_transfer(coin, ctx.sender());
-            table::remove(&mut directory.top_two_list, object::id(nft_id));
+            table::remove(&mut directory.top_two_list, sender);
             directory.total_minted = directory.total_minted + coin_value;
             event::emit(RewardClaimed{
-                claimed_id: object::id(nft_id), 
+                claimed_id: ctx.sender(), 
                 claimed_amount: coin_value,
+                total_reward_minted: directory.total_minted,
             });
         };
-        if(table::contains(&directory.top_three_list, object::id(nft_id))){
-            let amount = table::borrow(&directory.top_three_list, object::id(nft_id));
+        if(table::contains(&directory.top_three_list, sender)){
+            let amount = table::borrow(&directory.top_three_list, sender);
             let coin = coin::mint<OXCOIN>(&mut directory.treasury, *amount, ctx);
             let coin_value = coin::value(&coin);
             assert!(coin_value < TotalSupply, ECannotMintMAXSUPPLY);
             transfer::public_transfer(coin, ctx.sender());
-            table::remove(&mut directory.top_three_list, object::id(nft_id));
+            table::remove(&mut directory.top_three_list, sender);
             directory.total_minted = directory.total_minted + coin_value;
             event::emit(RewardClaimed{
-                claimed_id: object::id(nft_id), 
+                claimed_id: ctx.sender(), 
                 claimed_amount: coin_value,
+                total_reward_minted: directory.total_minted,
             });
         };
-         event::emit(RewardClaimed{
-                claimed_id: object::id(nft_id), 
-                claimed_amount: 0u64,
-        });
     }
     
     public fun add_top_one_voter_list(
         _: &AdminCap,
         directory: &mut Directory,
-        top_voter: ID, 
+        top_voter: address, 
         amount: u64, 
     ){
         table::add(&mut directory.top_one_list, top_voter, amount); 
@@ -139,7 +146,7 @@ module oxdao::oxcoin {
     public fun add_top_two_voter_list(
         _: &AdminCap,
         directory: &mut Directory,
-        top_voter: ID, 
+        top_voter: address, 
         amount: u64, 
     ){
         table::add(&mut directory.top_two_list, top_voter, amount); 
@@ -148,7 +155,7 @@ module oxdao::oxcoin {
     public fun add_top_three_voter_list(
         _: &AdminCap,
         directory: &mut Directory,
-        top_voter: ID, 
+        top_voter: address, 
         amount: u64, 
     ){
         table::add(&mut directory.top_three_list, top_voter, amount); 

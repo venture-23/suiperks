@@ -110,6 +110,10 @@ module oxdao::ethena_dao {
         agree: bool,
     }
 
+    public struct CreateProposalEvent has copy, drop {
+        nft_id: ID,
+    }
+
     public struct RevokeVote has copy, drop {
         voter: address,
         proposal_id: ID,
@@ -195,7 +199,7 @@ module oxdao::ethena_dao {
 
     public fun propose(
         dao: &mut Dao,
-        _nft: &OxDaoNFT,
+        nft: &OxDaoNFT,
         c: &Clock,
         // action_delay: u64,
         // quorum_votes: u64,
@@ -226,7 +230,9 @@ module oxdao::ethena_dao {
             seek_amount,
             executable: false,
         };
-        
+        emit(CreateProposalEvent{
+            nft_id: object::id(nft),
+        });
         proposal
     }
 
