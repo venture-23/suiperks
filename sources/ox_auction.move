@@ -15,7 +15,6 @@ module oxdao::auction {
     const ELessthanReservePrice: u64 = 1; 
     const ELessThanLastBidByMinBidIncPercentage: u64 = 2;
     const EAuctionNotEnded: u64 = 3; 
-    //const ETableSizeNotEqualtoOne: u64 = 4; 
     const EAuctionisRunning: u64 = 5;
     const ENoAuctionisRunning: u64 = 6;
     const ENotEnoughPrice: u64 = 7;
@@ -25,7 +24,7 @@ module oxdao::auction {
         auction_id: ID,
         amount: u64,
         reserve_price: u64, 
-        duration: u64, // for how long 
+        duration: u64, 
         start_time: u64,
         end_time: u64, 
         min_bid_increment_percentage: u64,
@@ -54,7 +53,7 @@ module oxdao::auction {
         id: UID, 
         amount: u64,
         reserve_price: u64, 
-        duration: u64, // for how long 
+        duration: u64,
         start_time: u64,
         end_time: u64, 
         min_bid_increment_percentage: u64,
@@ -76,8 +75,6 @@ module oxdao::auction {
         auction_details: &mut AuctionDetails,
         reserve_price: u64, clock: &Clock, ctx: &mut TxContext
     ) {
-        // need to handle by cap later 
-        // who can create the auction 
         assert!(auction_details.active == false, EAuctionisRunning);
         let auction = AuctionInfo<T> {
             id: object::new(ctx),
@@ -95,7 +92,7 @@ module oxdao::auction {
             auction_id: object::uid_to_inner(&auction.id), 
             amount: auction.amount,
             reserve_price: auction.reserve_price, 
-            duration: auction.duration, // for how long 
+            duration: auction.duration, 
             start_time: auction.start_time,
             end_time: auction.end_time, 
             min_bid_increment_percentage: auction.min_bid_increment_percentage,
