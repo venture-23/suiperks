@@ -51,6 +51,52 @@ The project contains of several modules, each handling different aspect of the A
 5. **PERKS OxNFT**: Handles the creation of PERKS OxNFT with daily themes. TO-DO on-chain OxNFT is generation with PERKS NFT Traits and weights randomly on chain.
 
 
-## Flow 
+## Flow & Architecture 
 
 The Auction module defines the interface for creating, bidding on, and settling auctions. To become part of SUI PERKS, users participate by bidding on the NFT. The highest bidder wins the NFT, and the lowest bidder receives a refund of their amount. The highest bidder's amount is transferred to the treasury. The DAO module calculates dynamic quorum rates and thresholds, where the threshold is automatically determined based on the required amount for a proposal and the total balance in the treasury. Proposal status and interaction are maintained on-chain. PERKS holders are rewarded based on the points they have collected.
+
+![Sui perks](./suiperks_architecture.png)
+
+## Instructions for testing 
+
+### Initial
+
+1. Visit site  [https://rococo-mermaid-060f66.netlify.app/](Frontend deployed here:  https://rococo-mermaid-060f66.netlify.app/)
+2. Connect the wallet with your peference 
+3. If Auction is running  User can bid into the latest Running auction Highest bid will get the Perks NFT.
+
+
+### Auction Duration and Testing
+
+- The auction typically runs for 24 hours.
+- For feasible testing purposes, the auction duration is set to 3 minutes.
+
+### Auction Creation and Settlement
+
+- Creating and settling an auction must be triggered manually for testing purposes.
+- If an auction is currently running, no new auctions can be created until the current auction is settled.
+
+### Bidding and Settling
+
+- During an active auction, you can place bids to obtain the NFT.
+- If the auction has ended, someone needs to trigger the settlement function.
+
+### Testing Instructions
+
+- For testing, please visit the following URL: [https://rococo-mermaid-060f66.netlify.app/admin](https://rococo-mermaid-060f66.netlify.app/admin).
+- After settling the previous auction, you can create a new auction from the same URL. This will restart the auction process. this will be automate in future
+
+### PERKS HOLDERS
+
+- **Creating, Voting, and Claiming Rewards**
+   - Create a proposal, vote on the proposal, and claim the oxcoin reward through engagement.
+
+- **Proposal States**
+   - **Initial**: Immediately after creating the auction, the proposal is in the `Initial` state.
+   - **Active**: After a short period, the proposal becomes active. NFT holders can vote on proposals and make decisions during this state.
+   - **Failed**: If the total votes do not meet the provided threshold, the proposal will be marked as failed.
+   - **Queue**: If the proposal reaches votes above the provided threshold, it will move to the `Queue` state.
+   - **Executed**: After being queued, the proposal is ready for execution. The required funds are transferred from the treasury balance.
+
+### Engagement Rewards
+- The engagement of every Perks holder is tracked. Based on this engagement, SUI PERKS members can claim their OXCOIN rewards every month within certain time constraints. These OXCOIN rewards have utility for further use.
