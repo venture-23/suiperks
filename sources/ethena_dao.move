@@ -19,9 +19,7 @@ module oxdao::ethena_dao {
     const STATUS_FINISHED: u8 = 6;
 
     const EInvalidQuorumRate: u64 = 1;
-    // const EActionDelayTooShort: u64 = 2;
     const EEmptyHash: u64 = 3;
-    // const EMinQuorumVotesTooSmall: u64 = 4;
     const EAlreadyVoted: u64 = 5;
     const EProposalMustBeActive: u64 = 6;
     const ENotVoted: u64 = 7;
@@ -201,14 +199,10 @@ module oxdao::ethena_dao {
         dao: &mut Dao,
         nft: &OxDaoNFT,
         c: &Clock,
-        // action_delay: u64,
-        // quorum_votes: u64,
         hash: String,
         seek_amount: u64,
         ctx: &mut TxContext    
     ): Proposal{
-        // assert!(action_delay >= dao.min_action_delay, EActionDelayTooShort);
-        // assert!(quorum_votes >= dao.min_quorum_votes, EMinQuorumVotesTooSmall);
         assert!(string::length(&hash) != 0, EEmptyHash);
 
         let start_time = clock::timestamp_ms(c) + dao.voting_delay;
@@ -474,11 +468,9 @@ module oxdao::ethena_dao {
         ctx: &mut TxContext
     ){
         let now = clock::timestamp_ms(c);
-       // assert!(proposal_state_impl(dao, proposal_id, now) == STATUS_EXECUTABLE, ECannotExecuteThisProposal);
         assert!(table::contains(&dao.queued_proposal, proposal_id), ECannotExecuteThisProposal);
         assert!(now >= end_time(proposal_id, dao) + action_delay(proposal_id, dao), ETooEarlyToExecute);
         assert!(!table::contains(&dao.executed_proposal, proposal_id), EAlreadyExecuted);
-        // call friend function to transfer amount from treasury to proposer creator
         let seek_amount = seek_amount(proposal_id, dao);
         let proposer = proposer(proposal_id, dao);
         let coin = dao_treasury::transfer<T>(treasury, seek_amount, proposer, ctx);
