@@ -61,7 +61,7 @@ The Auction module defines the interface for creating, bidding on, and settling 
 
 ### Initial
 
-1. Visit site  [https://rococo-mermaid-060f66.netlify.app/](Frontend deployed here:  https://rococo-mermaid-060f66.netlify.app/)
+1. Visit site  [https://rococo-mermaid-060f66.netlify.app/](https://rococo-mermaid-060f66.netlify.app/)
 2. Connect the wallet with your peference 
 3. If Auction is running  User can bid into the latest Running auction Highest bid will get the Perks NFT.
 
