@@ -55,7 +55,7 @@ The project contains of several modules, each handling different aspect of the A
 
 The Auction module defines the interface for creating, bidding on, and settling auctions. To become part of SUI PERKS, users participate by bidding on the NFT. The highest bidder wins the NFT, and the lowest bidder receives a refund of their amount. The highest bidder's amount is transferred to the treasury. The DAO module calculates dynamic quorum rates and thresholds, where the threshold is automatically determined based on the required amount for a proposal and the total balance in the treasury. Proposal status and interaction are maintained on-chain. PERKS holders are rewarded based on the points they have collected.
 
-![Sui perks](./suiperks_architecture.png)
+![Sui perks](./suiarchitecture.png)
 
 ## Instructions for testing 
 
