@@ -61,7 +61,7 @@ The Auction module defines the interface for creating, bidding on, and settling 
 
 ### Initial
 
-1. Visit site  [https://rococo-mermaid-060f66.netlify.app/](https://rococo-mermaid-060f66.netlify.app/)
+1. Visit site  [https://suiperks-fe.onrender.com/](https://suiperks-fe.onrender.com/)
 2. Connect the wallet with your peference 
 3. If Auction is running  User can bid into the latest Running auction Highest bid will get the Perks NFT.
 
@@ -83,7 +83,7 @@ The Auction module defines the interface for creating, bidding on, and settling 
 
 ### Testing Instructions
 
-- For testing, please visit the following URL: [https://rococo-mermaid-060f66.netlify.app/admin](https://rococo-mermaid-060f66.netlify.app/admin).
+- For testing, please visit the following URL: [https://suiperks-fe.onrender.com/admin](https://suiperks-fe.onrender.com/admin).
 - After settling the previous auction, you can create a new auction from the same URL. This will restart the auction process. this will be automate in future
 
 ### PERKS HOLDERS
