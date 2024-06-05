@@ -100,3 +100,7 @@ The Auction module defines the interface for creating, bidding on, and settling 
 
 ### Engagement Rewards
 - The engagement of every Perks holder is tracked. Based on this engagement, SUI PERKS members can claim their OXCOIN rewards every month within certain time constraints. These OXCOIN rewards have utility for further use.
+
+### Published Contract [Testnet]
+
+**packageId**: [0xd5041c59677148dc30026cecc37449f80b4c28b16bd70031a409a637aa812502](https://suiscan.xyz/testnet/object/0xd5041c59677148dc30026cecc37449f80b4c28b16bd70031a409a637aa812502)
