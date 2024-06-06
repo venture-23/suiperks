@@ -103,4 +103,6 @@ The Auction module defines the interface for creating, bidding on, and settling 
 
 ### Published Contract [Testnet]
 
-**packageId**: [0xd5041c59677148dc30026cecc37449f80b4c28b16bd70031a409a637aa812502](https://suiscan.xyz/testnet/object/0xd5041c59677148dc30026cecc37449f80b4c28b16bd70031a409a637aa812502)
+**packageId**: [0xd57d07c950cc0afe318398479edf3e7f8a3f4475d60f080304323af6372105a5](https://suiscan.xyz/testnet/object/0xd57d07c950cc0afe318398479edf3e7f8a3f4475d60f080304323af6372105a5/txs)
+**AuctionDetails**: [0xd5041c59677148dc30026cecc37449f80b4c28b16bd70031a409a637aa812502](https://suiscan.xyz/testnet/object/0xd5041c59677148dc30026cecc37449f80b4c28b16bd70031a409a637aa812502)
+**DaoTreasury**: [0xbfdea87b0747cc3881be7140980cf46ed04a592ee94236b5a24603a67edf78fd](https://suiscan.xyz/testnet/object/0xbfdea87b0747cc3881be7140980cf46ed04a592ee94236b5a24603a67edf78fd)
